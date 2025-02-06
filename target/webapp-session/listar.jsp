@@ -40,5 +40,6 @@ String mensajeApp = (String) getServletContext().getAttribute("mensaje");
     </table>
     <p><%=mensajeApp%></p>
     <p><%=mensajeRequest%></p>
+    <p><a href="<%=request.getContextPath()%>/index.html">volver</a></p>
 </body>
 </html>
