@@ -47,12 +47,33 @@ public class ProductoRepositoryImpl implements Repository<Producto> {
 
     @Override
     public void guardar(Producto producto) throws SQLException {
-
+        String sql;
+        if (producto.getId() != null && producto.getId() > 0) {
+            sql = "update productos set nombre=?, precio=?, sku=?, categoria_id=? where id=?";
+        } else {
+            sql = "insert into productos (nombre, precio, sku, categoria_id, fecha_registro) values (?,?,?,?,?)";
+        }
+        try(PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, producto.getNombre());
+            stmt.setInt(2, producto.getPrecio());
+            stmt.setString(3, producto.getSku());
+            stmt.setLong(4, producto.getCategoria().getId());
+            if (producto.getId() != null && producto.getId() > 0) {
+                stmt.setLong(5, producto.getId());
+            } else {
+                stmt.setDate(5, Date.valueOf(producto.getFechaRegistro()));
+            }
+            stmt.executeUpdate();
+        }
     }
 
     @Override
     public void eliminar(Long id) throws SQLException {
-
+        String sql = "delete from productos where id=?";
+        try(PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, id);
+            stmt.executeUpdate();
+        }
     }
 
     private static Producto getProducto(ResultSet rs) throws SQLException {
