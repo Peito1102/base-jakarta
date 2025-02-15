@@ -1,3 +1,4 @@
+org\aguzman\apiservlet\webapp\headers\controllers\ProductoEliminarServlet.class
 org\aguzman\apiservlet\webapp\headers\services\LoginService.class
 org\aguzman\apiservlet\webapp\headers\controllers\ProductoServlet.class
 org\aguzman\apiservlet\webapp\headers\listeners\AplicacionListener.class

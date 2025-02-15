@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.text.DateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +27,6 @@ public class ProductoFormServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Connection conn = (Connection) req.getAttribute("conn");
         ProductoService service = new ProductoServiceJDBCImpl(conn);
-        req.setAttribute("categorias", service.listarCategoria());
         Long id;
         try {
             id = Long.parseLong(req.getParameter("id"));
@@ -41,6 +41,7 @@ public class ProductoFormServlet extends HttpServlet {
                 producto = o.get();
             }
         }
+        req.setAttribute("categorias", service.listarCategoria());
         req.setAttribute("producto",producto);
         getServletContext().getRequestDispatcher("/form.jsp").forward(req,resp);
     }
@@ -84,25 +85,42 @@ public class ProductoFormServlet extends HttpServlet {
         if (categoriaId.equals(0L)) {
             errores.put("categoria", "la categoria es requerida!");
         }
+        LocalDate fecha;
+        try {
+            fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } catch (DateTimeParseException e) {
+            fecha = null;
+        }
+
+        long id;
+        try {
+            id = Long.parseLong(req.getParameter("id"));
+        } catch (NumberFormatException e) {
+            id = 0L;
+        }
+
+        Producto producto = new Producto();
+        producto.setId(id);
+        producto.setNombre(nombre);
+        producto.setPrecio(precio);
+        producto.setSku(sku);
+        producto.setFechaRegistro(fecha);
+
+        Categoria categoria = new Categoria();
+        categoria.setId(categoriaId);
+
+        producto.setCategoria(categoria);
         if (errores.isEmpty()) {
-            LocalDate fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            Producto producto = new Producto();
-            producto.setNombre(nombre);
-            producto.setPrecio(precio);
-            producto.setSku(sku);
-            producto.setFechaRegistro(fecha);
 
-            Categoria categoria = new Categoria();
-            categoria.setId(categoriaId);
-
-            producto.setCategoria(categoria);
 
             service.guardar(producto);
 
             resp.sendRedirect(req.getContextPath() + "/productos");
         } else {
             req.setAttribute("errores",errores);
-            doGet(req,resp);
+            req.setAttribute("categorias", service.listarCategoria());
+            req.setAttribute("producto",producto);
+            getServletContext().getRequestDispatcher("/form.jsp").forward(req,resp);
         }
 
     }
