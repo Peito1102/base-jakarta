@@ -5,7 +5,9 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.aguzman.apiservlet.webapp.headers.services.ServiceJDBCException;
 import org.aguzman.apiservlet.webapp.headers.util.ConexionBD;
+import org.aguzman.apiservlet.webapp.headers.util.ConexionBDDS;
 
+import javax.naming.NamingException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,7 +16,7 @@ import java.sql.SQLException;
 public class ConexionFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        try(Connection conn = ConexionBD.getConnection()) {
+        try(Connection conn = ConexionBDDS.getConnection()) {
             if (conn.getAutoCommit()) {
                 conn.setAutoCommit(false);
             }
@@ -28,7 +30,7 @@ public class ConexionFilter implements Filter {
                 e.printStackTrace();
             }
 
-        } catch (SQLException throwables) {
+        } catch (SQLException | NamingException throwables) {
             throwables.printStackTrace();
         }
     }
